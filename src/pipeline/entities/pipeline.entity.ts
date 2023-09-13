@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { LoadEntity } from '../../load/entities/load.entity';
 import { LoadService } from '../../load/load.service';
 import { ReadQueryResponse } from '../../query/dto/read-query.dto';
@@ -48,6 +48,7 @@ export class PipelineEntity {
       this.query = pipelineEntity.query;
       this.transform = pipelineEntity.transform;
       this.load = pipelineEntity.load;
+      this.schedule = pipelineEntity.schedule;
     }
   }
   @PrimaryColumn()
@@ -61,4 +62,7 @@ export class PipelineEntity {
 
   @ManyToOne((type) => LoadEntity, (load) => load.loadId)
   load?: LoadEntity;
+
+  @Column({ nullable: true })
+  schedule?: string;
 }

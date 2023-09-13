@@ -8,8 +8,9 @@ import { QueryEntity } from '../query/entities/query.entity';
 import { QueryService } from '../query/query.service';
 import { TransformService } from '../transform/transform.service';
 import { CreatePipelineDto } from './dto/create-pipeline.dto';
-import { UpdatePipelineDto } from './dto/update-pipeline.dto';
 import { PipelineEntity } from './entities/pipeline.entity';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 
 @Injectable()
 export class PipelineService {
@@ -19,9 +20,12 @@ export class PipelineService {
     private queryService: QueryService,
     private loadService: LoadService,
     private transformService: TransformService,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
   async create(createPipelineDto: CreatePipelineDto) {
-    const { transformId, queryId, loadId, pipelineId } = createPipelineDto;
+    const { transformId, queryId, loadId, pipelineId, schedule } =
+      createPipelineDto;
+
     let setPipelineId = pipelineId;
     if (!setPipelineId) {
       setPipelineId = randomUUID();
@@ -33,8 +37,22 @@ export class PipelineService {
       query: queryEntity,
       transform: await this.transformService.findOne(transformId),
       load: await this.loadService.findOne(loadId),
+      schedule,
     });
-    return this.pipelineRepository.save(pipeline);
+
+    const saved = await this.pipelineRepository.save(pipeline);
+    if (schedule) {
+      const job = new CronJob(
+        schedule,
+        this.executePipeline.bind(this, saved.pipelineId),
+        null,
+        true,
+      );
+
+      this.schedulerRegistry.addCronJob(setPipelineId, job);
+      job.start();
+    }
+    return saved;
   }
 
   findAll() {
@@ -50,12 +68,19 @@ export class PipelineService {
     });
   }
 
-  update(id: string, updatePipelineDto: UpdatePipelineDto) {
-    return `This action updates a #${id} pipeline`;
-  }
+  async remove(id: string) {
+    const found = await this.findOne(id);
+    if (found?.length > 0) {
+      const [pipeline] = found;
+      if (pipeline.schedule) {
+        const job = this.schedulerRegistry.getCronJob(pipeline.pipelineId);
+        job.stop();
+        this.schedulerRegistry.deleteCronJob(pipeline.pipelineId);
+      }
+    }
+    const removed = this.pipelineRepository.remove({ pipelineId: id });
 
-  remove(id: string) {
-    return this.pipelineRepository.remove({ pipelineId: id });
+    return removed;
   }
   async executePipeline(id: string) {
     const [pipeline] = await this.findOne(id);

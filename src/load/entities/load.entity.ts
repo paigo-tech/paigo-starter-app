@@ -7,6 +7,8 @@ import {
   PaigoAPILoadParameters,
 } from '../dto/create-load.dto';
 
+import fetch from 'node-fetch';
+
 @Entity()
 export class LoadEntity {
   static async loadData({

@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { PipelineService } from './pipeline.service';
 import { CreatePipelineDto } from './dto/create-pipeline.dto';
-import { UpdatePipelineDto } from './dto/update-pipeline.dto';
 
 @Controller('pipeline')
 export class PipelineController {
@@ -32,14 +23,6 @@ export class PipelineController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.pipelineService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePipelineDto: UpdatePipelineDto,
-  ) {
-    return this.pipelineService.update(id, updatePipelineDto);
   }
 
   @Delete(':id')

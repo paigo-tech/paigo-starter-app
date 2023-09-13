@@ -6,6 +6,7 @@ import { TransformModule } from './transform/transform.module';
 import { LoadModule } from './load/load.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PipelineModule } from './pipeline/pipeline.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PipelineModule } from './pipeline/pipeline.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    ScheduleModule.forRoot(),
     PipelineModule,
   ],
   controllers: [AppController],

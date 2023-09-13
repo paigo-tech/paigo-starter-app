@@ -15,7 +15,7 @@ export class QueryRunner {
     this.influxQueryAPI = {};
   }
 
-  static customQueryParserExecutor({
+  customQueryParserExecutor({
     filePath,
     query,
     databaseParameters,
@@ -26,7 +26,7 @@ export class QueryRunner {
   }): Array<any> {
     //eslint-disable-next-line @typescript-eslint/no-var-requires
     const functionCode = require(filePath);
-    return functionCode.handler({query, databaseParameters});
+    return functionCode.handler({ query, databaseParameters });
   }
   executeMysqlQuery({
     query,
@@ -97,7 +97,7 @@ export class QueryEntity {
   @Column()
   queryName: string;
 
-  @Column()
+  @Column({ nullable: true })
   customQueryParser?: string;
   static getQueryParserFilePath({ queryId }: { queryId: string }) {
     const filePath = path.join(
@@ -135,8 +135,11 @@ export class QueryEntity {
     const queryId = queryResponse.queryId;
     switch (databaseType) {
       case queryResponse?.customQueryParser:
-        return queryRunner.
-
+        return queryRunner.customQueryParserExecutor({
+          query,
+          databaseParameters,
+          filePath: QueryEntity.getQueryParserFilePath({ queryId }),
+        });
       case DatabaseType.MYSQL:
         throw new Error('MYSQL database type not implemented');
       case DatabaseType.INFLUXDB:

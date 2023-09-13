@@ -3,4 +3,5 @@ export class CreatePipelineDto {
   queryId: string;
   transformId?: string;
   loadId: string;
+  schedule?: string;
 }
