@@ -42,15 +42,8 @@ export class PipelineService {
 
     const saved = await this.pipelineRepository.save(pipeline);
     if (schedule) {
-      const job = new CronJob(
-        schedule,
-        this.executePipeline.bind(this, saved.pipelineId),
-        null,
-        true,
-      );
-
-      this.schedulerRegistry.addCronJob(setPipelineId, job);
-      job.start();
+      const job = this.createCronJob(saved.pipelineId, schedule);
+      this.registerSchedule(job, saved.pipelineId);
     }
     return saved;
   }
@@ -66,6 +59,19 @@ export class PipelineService {
       where: { pipelineId: id },
       relations: ['query', 'transform', 'load'],
     });
+  }
+  createCronJob(id: string, schedule: string): CronJob {
+    const job = new CronJob(
+      schedule,
+      this.executePipeline.bind(this, id),
+      null,
+      true,
+    );
+    return job;
+  }
+  registerSchedule(job: CronJob, id: string): void {
+    this.schedulerRegistry.addCronJob(id, job);
+    job.start();
   }
 
   async remove(id: string) {

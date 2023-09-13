@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { PipelineService } from './pipeline.service';
 import { PipelineController } from './pipeline.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -17,4 +17,23 @@ import { LoadModule } from '../load/load.module';
     LoadModule,
   ],
 })
-export class PipelineModule {}
+export class PipelineModule implements OnModuleInit {
+  constructor(private pipelineService: PipelineService) {}
+  async onModuleInit() {
+    const pipelines = await this.pipelineService.findAll();
+    pipelines.forEach((pipeline) => {
+      if (pipeline.schedule) {
+        console.log(
+          'registering schedule',
+          pipeline?.pipelineId,
+          pipeline?.schedule,
+        );
+        const job = this.pipelineService.createCronJob(
+          pipeline?.pipelineId,
+          pipeline?.schedule,
+        );
+        this.pipelineService.registerSchedule(job, pipeline?.pipelineId);
+      }
+    });
+  }
+}

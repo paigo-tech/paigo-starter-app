@@ -43,4 +43,4 @@ jobs:
       - name: Build, tag, and push QA image to Amazon ECR
         env:
           DEV_ENV_TRANSFORMER: ${{ secrets.DEV_ENV_TRANSFORMER }}
-        run: npm run build && docker build -t 647662420899.dkr.ecr.us-east-1.amazonaws.com/paigo-query-transform:${SHORT_SHA} . && docker push 647662420899.dkr.ecr.us-east-1.amazonaws.com/paigo-query-transform:${SHORT_SHA}
+        run: npm run build && docker build -t public.ecr.aws/m6j0z5r2/paigo-starter-app:${SHORT_SHA} . && docker push public.ecr.aws/m6j0z5r2/paigo-starter-app:${SHORT_SHA}

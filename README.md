@@ -23,7 +23,7 @@ To run the application SQLLite is required:
 
 ## Running the app
 
-The application is packaged as a docker file, the latest version is here: public.ecr.aws/m6j0z5r2/paigo-starter-app:live
+The application is packaged as a docker file, the latest version is here: `public.ecr.aws/m6j0z5r2/paigo-starter-app:live`
 You can alternatively clone and build the app yourself locally.
 
 
