@@ -5,4 +5,5 @@ LABEL maintainer="daniel.wasserlauf@paigo.tech"
     && apk add socat
 WORKDIR /paigo-query-transform
 COPY . /paigo-query-transform/
+RUN npm ci
 CMD ["npm", "run", "start:prod"]
