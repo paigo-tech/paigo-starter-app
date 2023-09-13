@@ -5,11 +5,16 @@ import {
   Body,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
   Put,
 } from '@nestjs/common';
 import { QueryService } from './query.service';
 import { CreateQueryDto } from './dto/create-query.dto';
 import { UpdateQueryDto } from './dto/update-query.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('query')
 export class QueryController {
@@ -44,5 +49,24 @@ export class QueryController {
   async execute(@Param('id') id: string) {
     const queryResponse = await this.queryService.findOne(id);
     return this.queryService.executeQuery({ queryResponse });
+  }
+
+  @Post(':id/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 1024 * 100 }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Param('id') id: string,
+  ) {
+    return this.queryService.writeFile({
+      buffer: file.buffer,
+      queryId: id,
+    });
   }
 }

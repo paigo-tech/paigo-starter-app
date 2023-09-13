@@ -8,12 +8,26 @@ import {
 } from '../dto/create-query.dto';
 import { InfluxDB, QueryApi } from '@influxdata/influxdb-client';
 import { ReadQueryResponse } from '../dto/read-query.dto';
+import * as path from 'path';
 export class QueryRunner {
   influxQueryAPI?: Record<string, QueryApi>;
   constructor() {
     this.influxQueryAPI = {};
   }
 
+  static customQueryParserExecutor({
+    filePath,
+    query,
+    databaseParameters,
+  }: {
+    query: string;
+    databaseParameters: DatabaseParameters;
+    filePath: string;
+  }): Array<any> {
+    //eslint-disable-next-line @typescript-eslint/no-var-requires
+    const functionCode = require(filePath);
+    return functionCode.handler({query, databaseParameters});
+  }
   executeMysqlQuery({
     query,
     databaseParameters,
@@ -83,6 +97,31 @@ export class QueryEntity {
   @Column()
   queryName: string;
 
+  @Column()
+  customQueryParser?: string;
+  static getQueryParserFilePath({ queryId }: { queryId: string }) {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'uploads',
+      queryId + '.js',
+    );
+    return filePath;
+  }
+
+  static customQueryParserExecutor({
+    filePath,
+    data,
+  }: {
+    data: Array<any> | Record<string, any>;
+    filePath: string;
+  }): any {
+    //eslint-disable-next-line @typescript-eslint/no-var-requires
+    const functionCode = require(filePath);
+    return functionCode.handler(data);
+  }
   static executeQuery({
     queryResponse,
     queryRunner,
@@ -95,6 +134,9 @@ export class QueryEntity {
     const databaseType = queryResponse.databaseType;
     const queryId = queryResponse.queryId;
     switch (databaseType) {
+      case queryResponse?.customQueryParser:
+        return queryRunner.
+
       case DatabaseType.MYSQL:
         throw new Error('MYSQL database type not implemented');
       case DatabaseType.INFLUXDB:

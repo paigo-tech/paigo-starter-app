@@ -18,7 +18,8 @@ export class MysqlDatabaseParameters {
 }
 export type DatabaseParameters =
   | MysqlDatabaseParameters
-  | InfluxDatabaseParameters;
+  | InfluxDatabaseParameters
+  | Record<string, any>;
 
 export class CreateQueryDto {
   query: string;
@@ -26,4 +27,5 @@ export class CreateQueryDto {
   databaseParameters: DatabaseParameters;
   databaseType: DatabaseType;
   queryId?: string;
+  customQueryParser?: string;
 }

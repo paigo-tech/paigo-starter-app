@@ -5,7 +5,7 @@ import { CreateQueryDto } from './dto/create-query.dto';
 import { ReadQueryResponse } from './dto/read-query.dto';
 import { UpdateQueryDto } from './dto/update-query.dto';
 import { QueryEntity, QueryRunner } from './entities/query.entity';
-
+import * as fs from 'fs';
 @Injectable()
 export class QueryService {
   queryRunner: QueryRunner;
@@ -22,6 +22,17 @@ export class QueryService {
 
   findAll(): Promise<QueryEntity[]> {
     return this.queryRepository.find();
+  }
+
+  writeFile({ buffer, queryId }: { buffer: Buffer; queryId: string }) {
+    const filePath = QueryEntity.getQueryParserFilePath({ queryId });
+    // Create the file path if it doesn't exist
+    const dir = filePath.substring(0, filePath.lastIndexOf('/'));
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, buffer);
+    return filePath;
   }
 
   async findOne(id: string): Promise<ReadQueryResponse> {
