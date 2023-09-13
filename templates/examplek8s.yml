@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paigo-example-app
+  namespace: <fill-me-in>
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1 # <2>
+      maxUnavailable: 0 # <3>
+    type: RollingUpdate # <1>
+  selector:
+    matchLabels:
+      app: paigo-example-app
+  template:
+    metadata:
+      labels:
+        app: paigo-example-app
+    spec:
+      volumes:
+        - name: uploaded-files
+          emptyDir:
+            size: 500Mi
+      containers:
+        - name: paigo-example-app
+          image: public.ecr.aws/m6j0z5r2/paigo-starter-app:live
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          volumeMounts:
+            - name: uploaded-files
+              mountPath: /paigo/uploads/
+          resources:
+            limits:
+              memory: '2Gi'
+              cpu: '2500m'
+            requests:
+              memory: '2Gi'
+              cpu: '800m'
