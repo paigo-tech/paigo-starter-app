@@ -15,7 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     LoadModule,
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'db',
+      database: 'db/db.sqlite3',
       autoLoadEntities: true,
       synchronize: true,
     }),

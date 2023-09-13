@@ -31,8 +31,15 @@ spec:
       terminationGracePeriodSeconds: 10
       volumes:
         - name: uploads
+          labels:
+            uploads: 'true'
           emptyDir:
-            size: 500Mi
+            size: 1Gi
+        - name: db
+          labels:
+            db: 'true'
+          emptyDir:
+            size: 1Gi
       containers:
         - name: paigo-example-app
           image: public.ecr.aws/m6j0z5r2/paigo-starter-app:live
@@ -42,12 +49,28 @@ spec:
           volumeMounts:
             - name: uploads
               mountPath: /paigo-query-transform/uploads
+            - name: db
+              mountPath: /paigo-query-transform/db
   volumeClaimTemplates:
     - metadata:
         name: uploads
       spec:
         accessModes: ['ReadWriteOnce']
         storageClassName: 'uploads'
+        selector:
+          matchLabels:
+            uploads: 'true'
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        name: db
+      spec:
+        accessModes: ['ReadWriteMany']
+        storageClassName: 'db'
+        selector:
+          matchLabels:
+            db: 'true'
         resources:
           requests:
             storage: 1Gi
