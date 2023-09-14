@@ -29,20 +29,9 @@ spec:
         app: paigo-example-app # has to match .spec.selector.matchLabels
     spec:
       terminationGracePeriodSeconds: 10
-      volumes:
-        - name: uploads
-          labels:
-            uploads: 'true'
-          emptyDir:
-            size: 1Gi
-        - name: db
-          labels:
-            db: 'true'
-          emptyDir:
-            size: 1Gi
       containers:
         - name: paigo-example-app
-          image: public.ecr.aws/m6j0z5r2/paigo-starter-app:live
+          image: public.ecr.aws/m6j0z5r2/paigo-starter-app:36e1605d
           ports:
             - containerPort: 3000
               name: entry
@@ -56,21 +45,15 @@ spec:
         name: uploads
       spec:
         accessModes: ['ReadWriteOnce']
-        storageClassName: 'uploads'
-        selector:
-          matchLabels:
-            uploads: 'true'
+        storageClassName: gp2
         resources:
           requests:
-            storage: 1Gi
+            storage: 5Gi
     - metadata:
         name: db
       spec:
-        accessModes: ['ReadWriteMany']
-        storageClassName: 'db'
-        selector:
-          matchLabels:
-            db: 'true'
+        accessModes: ['ReadWriteOnce']
+        storageClassName: gp2
         resources:
           requests:
-            storage: 1Gi
+            storage: 5Gi
